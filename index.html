@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老陈相册</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css" >
+  <link rel="stylesheet" href="./css/viewer.min.css">
+  <style>
+    .container {
+      padding: 0;
+    }
+    #galley {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-content: center;
+    }
+    .pictures {
+      list-style: none;
+      margin: 0;
+      max-width: 100%;
+      padding: 0;
+    }
+
+    .pictures > li {
+      border: 1px solid transparent;
+      float: left;
+      height: calc(100% / 3);
+      margin: 0px -1px -1px 0;
+      overflow: hidden;
+      width: calc(100% / 3);
+    }
+
+    .pictures > li > img {
+      cursor: zoom-in;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>2021</h1>
+    <div id="galley">
+      <ul class="pictures">
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="1"></li>
+        <li><img data-original="./image/2.jpeg" src="./image/2.jpeg" alt="2"></li>
+        <li><img data-original="./image/3.PNG" src="./image/3.PNG" alt="3"></li>
+        <li><img data-original="./image/4.jpg" src="./image/4.jpg" alt="4"></li>
+        <li><img data-original="./image/5.jpg" src="./image/5.jpg" alt="5"></li>
+        <li><img data-original="./image/6.jpg" src="./image//6.jpg" alt="6"></li>
+      </ul>
+      <h1>2022</h1>
+      <ul class="pictures">
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+      </ul>
+      <h1>2023</h1>
+      <ul class="pictures">
+        <li><img data-original="./image/1.jpeg" src="./image/1.jpeg" alt="7"></li>
+        <li><img data-original="./image/2.jpeg" src="./image/2.jpeg" alt="8"></li>
+        <li><img data-original="./image/3.PNG" src="./image/3.PNG" alt="9"></li>
+        <li><img data-original="./image/4.jpg" src="./image/4.jpg" alt="10"></li>
+        <li><img data-original="./image/5.jpg" src="./image/5.jpg" alt="11"></li>
+        <li><img data-original="./image/6.jpg" src="./image//6.jpg" alt="12"></li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="./js/jquery.slim.min.js"></script>
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script src="./js/viewer.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      var galley = document.getElementById('galley');
+      var maxOffsetPercentage = 0.9;
+      var viewer = new Viewer(galley, {
+        url: 'data-original',
+        backdrop: 'static',
+        move: function (event) {
+          var viewerData = viewer.viewerData;
+          var imageData = viewer.imageData;
+          var maxOffsetHorizontal = viewerData.width * maxOffsetPercentage;
+          var maxOffsetVertical = viewerData.height * maxOffsetPercentage;
+          var detail = event.detail;
+          var left = detail.x;
+          var top = detail.y;
+          var right = viewerData.width - (left + imageData.width);
+          var bottom = viewerData.height - (top + imageData.height);
+
+          if (
+            // Move left
+            (detail.x < detail.oldX && right > 0 && right > maxOffsetHorizontal)
+
+            // Move right
+            || (detail.x > detail.oldX && left > 0 && left > maxOffsetHorizontal)
+
+            // Move up
+            || (detail.y < detail.oldY && bottom > 0 && bottom > maxOffsetVertical)
+
+            // Move down
+            || (detail.y > detail.oldY && top > 0 && top > maxOffsetVertical)
+          ) {
+            event.preventDefault();
+          }
+        },
+        zoomed: function (event) {
+          var detail = event.detail;
+
+          // Zoom out
+          if (detail.ratio < detail.oldRatio) {
+            var viewerData = viewer.viewerData;
+            var imageData = viewer.imageData;
+            var maxOffsetHorizontal = viewerData.width * maxOffsetPercentage;
+            var maxOffsetVertical = viewerData.height * maxOffsetPercentage;
+            var left = imageData.x;
+            var top = imageData.y;
+            var right = viewerData.width - (left + imageData.width);
+            var bottom = viewerData.height - (top + imageData.height);
+            var x = 0;
+            var y = 0;
+
+            if (right > 0 && right > maxOffsetHorizontal) {
+              x = maxOffsetHorizontal - right;
+            }
+
+            if (left > 0 && left > maxOffsetHorizontal) {
+              x = maxOffsetHorizontal - left;
+            }
+
+            if (bottom > 0 && bottom > maxOffsetVertical) {
+              y = bottom - maxOffsetVertical;
+            }
+
+            if (top > 0 && top > maxOffsetVertical) {
+              y = top - maxOffsetVertical;
+            }
+
+            // Move the image into view if it is invisible
+            if (x !== 0 || y !== 0) {
+              viewer.move(x, y);
+            }
+          }
+        },
+      });
+    });
+  </script>
+</body>
+</html>
